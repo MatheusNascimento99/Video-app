@@ -9,9 +9,8 @@ import * as MediaLibrary from 'expo-media-library';
 import { VideoPlayer } from './src/components/VideoPlayer';
 import { CameraViewComponent } from './src/components/CameraView';
 
-
 export default function App() {
-    const cameraRef = useRef < CameraView > (null);
+    const cameraRef = useRef<CameraView>(null);
     const [isRecording, setIsRecording] = useState(false);
     const [video, setVideo] = useState<any>();
 
@@ -36,31 +35,57 @@ export default function App() {
     }, []);
 
     const recordVideo = () => {
-        setIsRecording(true)
-        const options : CameraRecordingOptions = {
-            maxDuration:30,
+        setIsRecording(true);
+        const options: CameraRecordingOptions = {
+            maxDuration: 30,
         };
-        if(cameraRef && cameraRef.current){
-            cameraRef.current.recordAsync(options).then((recordVideo:any) => {
+        if (cameraRef && cameraRef.current) {
+            cameraRef.current.recordAsync(options).then((recordVideo: any) => {
                 setVideo(recordVideo);
-                setIsRecording(false)
-            })
+                setIsRecording(false);
+            });
         }
-    }
+    };
 
     const stopRecordVideo = () => {
-        
+        setIsRecording(false);
+        if (cameraRef && cameraRef.current) cameraRef.current.stopRecording();
+    };
+
+    if (video) {
+        const shareVideo = () => {
+            shareAsync(video.uri).then(() => {
+                setVideo(undefined);
+            });
+        };
+
+        const salveVideo = () => {
+            MediaLibrary.saveToLibraryAsync(video.uri).then(() => {
+                setVideo(undefined);
+            });
+        };
+
+        const discardVideo = () => {
+            setVideo(undefined);
+        };
+
+        return (
+            <VideoPlayer
+                video={video}
+                onShare={shareVideo}
+                onSave={salveVideo}
+                onDiscard={discardVideo}
+            />
+        );
     }
-
-
 
     return hasCameraPermission && hasMicrophonePermission ? (
         <View style={styles.container}>
-            <CameraViewComponent 
-            cameraRef={cameraRef}
-            isRecording={isRecording}
-            onRecording={recordVideo}
-            stopRecording={stopRecordVideo}
+            <CameraViewComponent
+                cameraRef={cameraRef}
+                isRecording={isRecording}
+                onRecording={recordVideo}
+                stopRecording={stopRecordVideo}
             />
             (hasMediaPermission ? (): ())
         </View>
@@ -83,11 +108,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    notpermission:{
-      flex: 1,
+    notpermission: {
+        flex: 1,
         backgroundColor: '#000',
-        color:"white",
+        color: 'white',
         alignItems: 'center',
-        marginTop:25
+        marginTop: 25,
     },
 });
